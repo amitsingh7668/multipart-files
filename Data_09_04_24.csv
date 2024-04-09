@@ -1,0 +1,24 @@
+Gene Type,Study Id,Cancer
+EGFR,8049291,Prostate Cancer
+BRAF,9792437,Colon Cancer
+EGFR,6314317,Lung Cancer
+CDKN2A,5653734,Skin Cancer
+EGFR,9671233,Lung Cancer
+PTEN,9369869,Prostate Cancer
+ALK,3692761,Leukemia
+BRCA2,2415264,Colon Cancer
+KIT,4529604,Prostate Cancer
+CDKN2A,2503273,Colon Cancer
+KIT,5021567,Lung Cancer
+ALK,1903759,Colon Cancer
+EGFR,4789784,Prostate Cancer
+KIT,1345865,Skin Cancer
+KIT,6078148,Leukemia
+KRAS,1629823,Lung Cancer
+KIT,7138424,Breast Cancer
+PTEN,2955442,Breast Cancer
+BRCA1,1197650,Leukemia
+EGFR,8315601,Colon Cancer
+TP53,6557870,Prostate Cancer
+TP53,7076078,Breast Cancer
+ALK,3159829,Breast Cancer
