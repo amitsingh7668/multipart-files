@@ -43,15 +43,15 @@ async def convert_csv_to_json1(fields: str = Form(...), file: UploadFile = File(
     return json_data
 
 
-def csv_to_json(csv_file):
+def csv_to_json(content):
     """
     Convert CSV file to JSON format.
     """
-    csv_data = io.StringIO(csv_file.decode('utf-8'))
-    reader = csv.DictReader(csv_data)
-    json_data = []
-    for row in reader:
-        json_data.append(row)
+    df = pd.read_csv(io.StringIO(content.decode('utf-8')))
+    
+    # Convert DataFrame to JSON
+    json_data = df.to_dict(orient='records')
+    
     return json_data
 
 
