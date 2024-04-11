@@ -46,32 +46,48 @@ def map_data_to_objects(df, mapping):
         if missing_columns:
             logging.info(
                 f"Error: Required columns for '{obj_name}' not found in CSV file: {', '.join(missing_columns)}")
-            continue
-
-        for index, row in df.iterrows():
-            obj_attrs = {}
-            for obj_attr, csv_col in flatten_mapping(obj_mapping):
-                obj_attrs[obj_attr] = row[csv_col]
-            # Create an instance of the business object
+            # Use default values from the JSON mapping
+            obj_attrs = get_default_values(obj_mapping)
             obj_class = globals().get(obj_name)
             if obj_class:
                 obj = obj_class(**obj_attrs)
                 objects.append(obj)
             else:
                 logging.info(f"Error: Class '{obj_name}' not found.")
+        else:
+            for index, row in df.iterrows():
+                obj_attrs = {}
+                for obj_attr, csv_col in flatten_mapping(obj_mapping):
+                    obj_attrs[obj_attr] = row[csv_col]
+                # Create an instance of the business object
+                obj_class = globals().get(obj_name)
+                if obj_class:
+                    obj = obj_class(**obj_attrs)
+                    objects.append(obj)
+                else:
+                    logging.info(f"Error: Class '{obj_name}' not found.")
     return objects
+
+def get_default_values(mapping):
+    default_values = {}
+    for key, value in mapping.items():
+        if isinstance(value, dict):
+            default_values[key] = get_default_values(value)
+        else:
+            default_values[key] = value  # Use the value from the mapping
+    return default_values
 
 # Helper function to flatten nested mapping
 
 
 def flatten_mapping(mapping, prefix=''):
-    flat_mapping = []
+    flat_mapping = {}
     for key, value in mapping.items():
         if isinstance(value, dict):
-            flat_mapping.extend(flatten_mapping(
-                value, prefix + key + '_NEXTOBJECT_'))
+            nested_flat_mapping = flatten_mapping(value, prefix + key + '_NEXTOBJECT_')
+            flat_mapping.update(nested_flat_mapping)
         else:
-            flat_mapping.append((prefix + key, value))
+            flat_mapping[prefix + key] = value
     return flat_mapping
 
 # Helper function to get all columns from nested mapping
@@ -79,12 +95,16 @@ def flatten_mapping(mapping, prefix=''):
 
 def get_all_columns(mapping):
     columns = []
-    for key, value in mapping.items():
-        if isinstance(value, dict):
+    if isinstance(mapping, dict):
+        for key, value in mapping.items():
             columns.extend(get_all_columns(value))
-        else:
-            columns.append(value)
+    elif isinstance(mapping, list):
+        for item in mapping:
+            columns.extend(get_all_columns(item))
+    else:
+        columns.append(mapping)
     return columns
+
 
 
 # Step 5: Perform the conversion
@@ -96,9 +116,13 @@ def convert_csv_to_business_objects(csv_file_path, json_mapping_path):
 
 
 # Example usage
-csv_file_path = 'data.csv'
-json_mapping_path = 'mapping.json'
-business_objects = convert_csv_to_business_objects(
-    csv_file_path, json_mapping_path)
-for obj in business_objects:
-    logging.info(vars(obj))  # logging.info attributes of each business object
+def generate_dat():
+    listobj = []
+    csv_file_path = 'data.csv'
+    json_mapping_path = 'mapping.json'
+    business_objects = convert_csv_to_business_objects(
+        csv_file_path, json_mapping_path)
+    for obj in business_objects:
+        listobj.append(vars(obj))  # logging.info attributes of each business object
+
+    return listobj
