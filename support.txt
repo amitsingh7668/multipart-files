@@ -1,0 +1,11 @@
+import pandas as pd
+
+# Read JSON data from the file into a Pandas DataFrame
+df = pd.read_json('your_file.json')
+
+# Convert the DataFrame to a flattened dictionary
+flattened_dict = df.to_dict(orient='records')[0]
+
+# Display the flattened key-value pairs
+for key, value in flattened_dict.items():
+    print(key, ":", value)
