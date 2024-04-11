@@ -1,4 +1,5 @@
 # Sample BusinessObject class
+from wholeflow import generate_dat
 class BusinessObject:
     def __init__(self, details=None):
         self.details = details
@@ -21,14 +22,22 @@ def update_nested_attribute(obj, nested_key, value):
 
 # Example usage
 # Create a sample BusinessObject with nested structure
-business_obj = BusinessObject(Details(Contacts()))
 
 # Sample key-value pair
 key = 'details_NEXTOBJECT_contacts_NEXTOBJECT_email'
 value = 'bob@example.com'
 
-# Update the nested attribute using the key-value pair
-update_nested_attribute(business_obj, key, value)
+datalis = generate_dat()
 
-# Print the updated value
-print(business_obj.details.contacts.email)  # Output: bob@example.com
+# Update the nested attribute using the key-value pair
+listobj = []
+for dat in datalis:
+    business_obj = BusinessObject(Details(Contacts()))
+    for key, value in dat.items():
+        update_nested_attribute(business_obj, key, value)
+    listobj.append(vars(business_obj))
+
+print(listobj)
+
+
+
