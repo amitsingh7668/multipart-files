@@ -44,8 +44,8 @@ def map_data_to_objects(df, mapping):
         # Check if all required columns exist in the CSV
         missing_columns = required_columns - csv_columns
         if missing_columns:
-            logging.info(
-                f"Error: Required columns for '{obj_name}' not found in CSV file: {', '.join(missing_columns)}")
+             logging.info(
+            f"Error: Required columns for '{obj_name}' not found in CSV file: {', '.join(map(str, missing_columns))}")
             # Use default values from the JSON mapping
             obj_attrs = get_default_values(obj_mapping)
             obj_class = globals().get(obj_name)
