@@ -8,7 +8,12 @@ logging.basicConfig(level=logging.INFO)
 
 
 def read_csv(file_path):
-    return pd.read_csv(file_path)
+    if file_path.endswith('.csv'):
+        return pd.read_csv(file_path)
+    elif file_path.endswith('.xlsx'):
+        return pd.read_excel(file_path)
+    else:
+        raise ValueError("Unsupported file format. Only CSV and Excel files are supported.")
 
 # Step 2: Read JSON mapping sheet into a Python dictionary
 
