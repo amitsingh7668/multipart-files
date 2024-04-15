@@ -32,3 +32,19 @@ complex_dict = {
     'f': [6, 7, {'g': 8}]
 }
 find_key(complex_dict, 'e')
+
+
+def iterate_objects(obj, indent=0):
+    if isinstance(obj, (list, tuple)):
+        for item in obj:
+            iterate_objects(item, indent + 1)
+    elif isinstance(obj, dict):
+        for key, value in obj.items():
+            print(' ' * indent * 2 + f'{key}:')
+            iterate_objects(value, indent + 1)
+    elif hasattr(obj, '__dict__'):
+        for key, value in obj.__dict__.items():
+            print(' ' * indent * 2 + f'{key}:')
+            iterate_objects(value, indent + 1)
+    else:
+        print(' ' * indent * 2 + str(obj))
