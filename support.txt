@@ -61,3 +61,10 @@ def obj_to_dict(obj):
         return {key: obj_to_dict(value) for key, value in obj.__dict__.items()}
     else:
         return obj
+
+
+
+import re
+
+text = "$demo$123$"
+text = re.sub(r"^\$|\$$", "", text)
