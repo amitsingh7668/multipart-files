@@ -1,24 +1,24 @@
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class RequestResponseLoggingFilter extends javax.servlet.Filter {
+public class RequestResponseLoggingFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) 
-        throws IOException, ServletException {
-
+            throws IOException, ServletException {
+        
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
@@ -51,5 +51,15 @@ public class RequestResponseLoggingFilter extends javax.servlet.Filter {
     private void logResponse(HttpServletResponse response) {
         System.out.println("Response Status: " + response.getStatus());
         // You can add more details if needed
+    }
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        // Optional: filter initialization
+    }
+
+    @Override
+    public void destroy() {
+        // Optional: cleanup resources
     }
 }
