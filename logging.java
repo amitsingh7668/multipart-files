@@ -18,20 +18,29 @@ public class RequestResponseLoggingFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) 
             throws IOException, ServletException {
-        
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        // Log the incoming request
-        logRequest(httpRequest);
+        // Wrap the request and response to log their payloads
+        RequestWrapper wrappedRequest = new RequestWrapper((HttpServletRequest) request);
+        ResponseWrapper wrappedResponse = new ResponseWrapper((HttpServletResponse) response);
 
-        chain.doFilter(request, response);
+        // Record the start time before processing the request
+        long startTime = System.currentTimeMillis();
 
-        // Log the outgoing response
-        logResponse(httpResponse);
+        // Log the request details
+        logRequest(wrappedRequest);
+
+        // Continue the request-response chain
+        chain.doFilter(wrappedRequest, wrappedResponse);
+
+        // Record the end time after processing the request
+        long endTime = System.currentTimeMillis();
+        long executionTime = endTime - startTime;
+
+        // Log the response details and execution time
+        logResponse(wrappedResponse, executionTime);
     }
 
-    private void logRequest(HttpServletRequest request) throws IOException {
+    private void logRequest(RequestWrapper request) throws IOException {
         String headers = Collections.list(request.getHeaderNames())
             .stream()
             .map(header -> header + ": " + request.getHeader(header))
@@ -46,11 +55,13 @@ public class RequestResponseLoggingFilter implements Filter {
         System.out.println("Request URI: " + request.getRequestURI());
         System.out.println("Request Headers: \n" + headers);
         System.out.println("Request Parameters: " + params);
+        System.out.println("Request Body: " + request.getBody());
     }
 
-    private void logResponse(HttpServletResponse response) {
+    private void logResponse(ResponseWrapper response, long executionTime) throws IOException {
         System.out.println("Response Status: " + response.getStatus());
-        // You can add more details if needed
+        System.out.println("Response Body: " + response.getContent());
+        System.out.println("Total Execution Time: " + executionTime + " ms");
     }
 
     @Override
