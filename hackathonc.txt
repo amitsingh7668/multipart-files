@@ -1,0 +1,70 @@
+# Use official PostgreSQL image
+FROM postgres:latest
+ 
+# Environment variables to set default user, password, and database
+ENV POSTGRES_USER=myuser
+ENV POSTGRES_PASSWORD=mypassword
+ENV POSTGRES_DB=mydatabase
+ 
+# Expose PostgreSQL port
+EXPOSE 5432
+ 
+ 
+# Build the image (assuming the Dockerfile is in the current directory)
+docker build -t mypostgres .
+ 
+# Run the PostgreSQL container
+docker run --name mypostgresdb -d -p 5432:5432 mypostgres
+ 
+ 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+ 
+public class PostgresTestConnection {
+ 
+    public static void main(String[] args) {
+        // JDBC URL format for PostgreSQL
+        String jdbcUrl = "jdbc:postgresql://localhost:5432/mydatabase";
+        String username = "myuser";
+        String password = "mypassword";
+ 
+        Connection connection = null;
+ 
+        try {
+            // Load the PostgreSQL JDBC driver
+            Class.forName("org.postgresql.Driver");
+ 
+            // Connect to PostgreSQL database
+            connection = DriverManager.getConnection(jdbcUrl, username, password);
+ 
+            if (connection != null) {
+                System.out.println("Connected to the PostgreSQL database successfully!");
+            } else {
+                System.out.println("Failed to make a connection.");
+            }
+ 
+        } catch (ClassNotFoundException e) {
+            System.out.println("PostgreSQL JDBC Driver not found. Include in your library path.");
+            e.printStackTrace();
+        } catch (SQLException e) {
+            System.out.println("Connection failed. Check output console.");
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+}
+ 
+ 
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <version>42.5.0</version>
+</dependency>
