@@ -1,0 +1,37 @@
+version: '3.8'
+ 
+services:
+  postgresdb:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+ 
+  java-app:
+    build: .
+    depends_on:
+      - postgresdb
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresdb:5432/mydatabase
+      SPRING_DATASOURCE_USERNAME: myuser
+      SPRING_DATASOURCE_PASSWORD: mypassword
+    networks:
+      - app-network
+    ports:
+      - "8080:8080"  # Assuming your Java app runs on port 8080
+    volumes:
+      - .:/app
+ 
+volumes:
+  postgres_data:
+ 
+networks:
+  app-network:
+    driver: bridge
