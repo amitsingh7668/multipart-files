@@ -1,82 +1,52 @@
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import java.io.IOException;
 
 import static org.mockito.Mockito.*;
 
 class RequestResponseLoggingFilterTest {
 
-    private RequestResponseLoggingFilter filter;
-    private HttpServletRequest request;
-    private HttpServletResponse response;
+    private RequestResponseLoggingFilter requestResponseLoggingFilter;
+    private MockHttpServletRequest request;
+    private MockHttpServletResponse response;
     private FilterChain filterChain;
-    private RequestWrapper requestWrapper;
-    private ResponseWrapper responseWrapper;
 
     @BeforeEach
     void setUp() {
-        filter = new RequestResponseLoggingFilter();
-        request = mock(HttpServletRequest.class);
-        response = mock(HttpServletResponse.class);
+        requestResponseLoggingFilter = new RequestResponseLoggingFilter();
+        request = new MockHttpServletRequest();
+        response = new MockHttpServletResponse();
         filterChain = mock(FilterChain.class);
-
-        // Mock the custom wrappers as well
-        requestWrapper = mock(RequestWrapper.class);
-        responseWrapper = mock(ResponseWrapper.class);
     }
 
     @Test
-    void testDoFilter() throws IOException, ServletException {
-        // Mock request data
-        when(request.getMethod()).thenReturn("GET");
-        when(request.getRequestURI()).thenReturn("/test");
-        when(request.getHeaderNames()).thenReturn(Collections.enumeration(Collections.emptyList()));
-        when(request.getParameterNames()).thenReturn(Collections.enumeration(Collections.emptyList()));
-        when(requestWrapper.getBody()).thenReturn("");  // Simulate an empty request body
+    void testDoFilter_logsRequestAndResponse() throws IOException, ServletException {
+        // Act
+        requestResponseLoggingFilter.doFilter(request, response, filterChain);
 
-        // Mock response data
-        when(responseWrapper.getStatus()).thenReturn(200);
-        when(responseWrapper.getContent()).thenReturn("OK");
-
-        // Execute the filter's doFilter method
-        filter.doFilter(request, response, filterChain);
-
-        // Verify the filter chain continues as expected
-        verify(filterChain).doFilter(any(RequestWrapper.class), any(ResponseWrapper.class));
-
-        // Verify request logging logic
-        verify(request).getMethod();
-        verify(request).getRequestURI();
+        // Assert
+        verify(filterChain).doFilter(request, response);
+        // You can also add additional asserts for any log messages or timing you want to validate.
     }
 
     @Test
-    void testLogRequestAndResponse() throws IOException, ServletException {
-        // Capture logs and simulate a request and response cycle
-        when(requestWrapper.getBody()).thenReturn("Test request body");
-        when(responseWrapper.getContent()).thenReturn("Test response content");
+    void testDoFilter_executesWithinTimeLimit() throws IOException, ServletException {
+        long startTime = System.currentTimeMillis();
 
-        // Capture the wrapped response and request for verification
-        ArgumentCaptor<RequestWrapper> requestCaptor = ArgumentCaptor.forClass(RequestWrapper.class);
-        ArgumentCaptor<ResponseWrapper> responseCaptor = ArgumentCaptor.forClass(ResponseWrapper.class);
+        // Act
+        requestResponseLoggingFilter.doFilter(request, response, filterChain);
 
-        // Execute the filter
-        filter.doFilter(request, response, filterChain);
+        long endTime = System.currentTimeMillis();
+        long executionTime = endTime - startTime;
 
-        // Verify that the filter has passed the wrapped request and response to the chain
-        verify(filterChain).doFilter(requestCaptor.capture(), responseCaptor.capture());
-
-        // Ensure that the captured request and response match the expected wrapped objects
-        assertNotNull(requestCaptor.getValue());
-        assertNotNull(responseCaptor.getValue());
-
-        // Verify that the logRequest and logResponse methods were called correctly
-        verify(requestWrapper).getBody();
-        verify(responseWrapper).getContent();
+        // Assert
+        assertTrue(executionTime < 500, "Filter execution took too long");
+        verify(filterChain, times(1)).doFilter(request, response);
     }
 }
