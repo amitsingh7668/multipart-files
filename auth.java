@@ -1,46 +1,53 @@
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-class RestTemplateConfigurationTest {
+class BigPandaAlertingTest {
 
     @Mock
-    private RestTemplateBuilder builder;
+    private RestTemplate restTemplate;
 
     @InjectMocks
-    private RestTemplateConfiguration config;
+    private BigPandaAlerting bigPandaAlerting;
+
+    private static final String BIG_PANDA_API_URL = "http://bigpanda.api";
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        bigPandaAlerting = new BigPandaAlerting(restTemplate);
+        bigPandaAlerting.bigPandaApi = BIG_PANDA_API_URL;
     }
 
     @Test
-    void testRestTemplateCreation() throws Exception {
-        // Mock the builder behavior
-        when(builder.setConnectTimeout(any())).thenReturn(builder);
-        when(builder.setReadTimeout(any())).thenReturn(builder);
-        when(builder.messageConverters(any(List.class))).thenReturn(builder);
-        when(builder.build()).thenReturn(new RestTemplate());
+    void testSendAlertToBigPanda() {
+        String description = "Test alert description";
+        String category = "Test category";
 
-        // Call the method under test
-        RestTemplate restTemplate = config.restTemplate("https://bigpanda.api", builder);
+        Map<String, Object> mockResponseBody = new HashMap<>();
+        mockResponseBody.put("key", "value"); // Mock response data
 
-        // Verify that the RestTemplate is properly created
-        assertNotNull(restTemplate);
-        verify(builder).setConnectTimeout(any());
-        verify(builder).setReadTimeout(any());
-        verify(builder).messageConverters(any(List.class));
+        ResponseEntity<Map> mockResponse = new ResponseEntity<>(mockResponseBody, null, 200);
+        when(restTemplate.exchange(eq(BIG_PANDA_API_URL), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
+                .thenReturn(mockResponse);
+
+        ResponseEntity<ApiResponse> responseEntity = bigPandaAlerting.sendAlertToBigPanda(description, category);
+
+        assertNotNull(responseEntity);
+        assertEquals(BigPandaAlerting.SUCCESS, responseEntity.getBody().getStatus());
+        assertEquals(mockResponseBody, responseEntity.getBody().getData());
+        verify(restTemplate).exchange(eq(BIG_PANDA_API_URL), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class));
     }
 }
