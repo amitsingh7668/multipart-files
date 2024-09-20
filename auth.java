@@ -1,54 +1,46 @@
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.util.Base64Utils;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
- 
-public class RestTemplateBasicAuthExample {
- 
-    public static void main(String[] args) {
-        // Define the username and password
-        String username = "your_username";
-        String password = "your_password";
- 
-        // URL of the API you want to call
-        String url = "https://api.example.com/your-endpoint";
- 
-        // Prepare Basic Auth header
-        HttpHeaders headers = createBasicAuthHeaders(username, password);
- 
-        // If you need to send a body with your POST request
-        String requestBody = "{\"key\":\"value\"}"; // Example request body (in JSON)
- 
-        // Create HttpEntity with headers and request body
-        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
- 
-        // Create a RestTemplate instance
-        RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
- 
-        // Execute the POST request
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
- 
-        // Check the response
-        if (response.getStatusCode() == HttpStatus.OK) {
-            System.out.println("Response: " + response.getBody());
-        } else {
-            System.out.println("Error: " + response.getStatusCode());
-        }
-    }
- 
-    // Method to create Basic Auth headers
-    private static HttpHeaders createBasicAuthHeaders(String username, String password) {
-        HttpHeaders headers = new HttpHeaders();
-        String auth = username + ":" + password;
-        byte[] encodedAuth = Base64Utils.encode(auth.getBytes());
-        String authHeader = "Basic " + new String(encodedAuth);
- 
-        headers.set("Authorization", authHeader);
-        headers.set("Content-Type", "application/json"); // Set content type as per your API requirement
-        return headers;
-    }
+
+import java.util.List;
+
+class RestTemplateConfigurationTest {
+
+    @Mock
+    private RestTemplateBuilder builder;
+
+    @InjectMocks
+    private RestTemplateConfiguration config;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void testRestTemplateCreation() throws Exception {
+        // Mock the builder behavior
+        when(builder.setConnectTimeout(any())).thenReturn(builder);
+        when(builder.setReadTimeout(any())).thenReturn(builder);
+        when(builder.messageConverters(any(List.class))).thenReturn(builder);
+        when(builder.build()).thenReturn(new RestTemplate());
+
+        // Call the method under test
+        RestTemplate restTemplate = config.restTemplate("https://bigpanda.api", builder);
+
+        // Verify that the RestTemplate is properly created
+        assertNotNull(restTemplate);
+        verify(builder).setConnectTimeout(any());
+        verify(builder).setReadTimeout(any());
+        verify(builder).messageConverters(any(List.class));
+    }
 }
