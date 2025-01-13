@@ -21,3 +21,14 @@ traces
     MessagesWithB = make_list(message, MessageType == "B")
   by operation_Id
 
+
+traces
+| where message contains "GCDS Response"  // Filter for messages with "GCDS Response"
+| where message contains "A" or message contains "B"  // Further filter for messages with "A" or "B"
+| order by timestamp desc  // Order by timestamp
+| summarize 
+    MessagesWithA = make_list_if(message, message contains "A"),  // Group messages containing "A"
+    MessagesWithB = make_list_if(message, message contains "B")   // Group messages containing "B"
+  by operation_Id  // Group by operation_Id
+
+
