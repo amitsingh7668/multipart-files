@@ -1,28 +1,26 @@
-# Use the official Python image
+# Use the official Python image as the base image
 FROM python:3.9-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    libc-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set working directory in the container
+# Set the working directory in the container
 WORKDIR /app
 
-# Install Python dependencies
+# Copy the requirements file and application code to the container
 COPY requirements.txt .
+COPY streamlit_gitlab_review.py .
+
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the application code into the container
-COPY . .
+# Expose Streamlit's default port
+EXPOSE 8501
 
-# Expose the port that the FastAPI application will run on
-EXPOSE 8000
 
-# Command to run the FastAPI application using uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+docker build -t streamlit-gitlab-review .
+docker run -p 8501:8501 streamlit-gitlab-review
+streamlit
+requests
+openai
+
+
+# Run the Streamlit app
+CMD ["streamlit", "run", "streamlit_gitlab_review.py", "--server.port=8501", "--server.enableCORS=false"]
